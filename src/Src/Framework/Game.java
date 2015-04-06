@@ -19,16 +19,18 @@ public class Game{
         this.window = window;
     }
     
+    //main game loop
     public void loop(){
         
         while( glfwWindowShouldClose(window.getWindowHandle()) == GL_FALSE ) {
             // clear the framebuffer 
             glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-             // swap the color buffers
+             // swap the frame buffers
             glfwSwapBuffers(window.getWindowHandle());
             // Poll for window events
             glfwPollEvents();
         }
+        
     }
     
 }
