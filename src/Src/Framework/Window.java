@@ -43,6 +43,7 @@ public class Window{
 
   public static void main(String[] args) {
    
+      //remember to place natives from NetBeansProjects/lwjgl-3/native/windows/x64 in lib folder before attempting to execute jar. not necessary fo running in IDE.
       System.setProperty("org.lwjgl.librarypath", new File("lib").getAbsolutePath());
       
       try {
