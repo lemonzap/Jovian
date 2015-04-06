@@ -22,9 +22,10 @@ import static org.lwjgl.system.MemoryUtil.*;
  * @author Lemonzap
  */
 public class Window{
+
     //initialize window size variables
-  private static int windowHeight = 512;
-  private static int windowWidth = 1024;
+  private int windowHeight = 512;
+  private int windowWidth = 1024;
   public static final Logger LOGGER = Logger.getLogger(Window.class.getName());
   private static Window window;
   private static Game game;
@@ -41,13 +42,18 @@ public class Window{
     }
   }
 
+  public Window(int height, int width){
+      windowHeight = height;
+      windowWidth = width;
+  }
+  
   public static void main(String[] args) {
    
       //remember to place natives from NetBeansProjects/lwjgl-3/native/windows/x64 in lib folder before attempting to execute jar. not necessary fo running in IDE.
       System.setProperty("org.lwjgl.librarypath", new File("lib").getAbsolutePath());
       
       try {
-        window = new Window();
+        window = new Window(512, 1024);
         window.create();
         game = new Game(window);
         game.loop();
@@ -98,28 +104,28 @@ public class Window{
   /**
      * @return the windowHeight
      */
-    public static int getHeight(){
+    public int getHeight(){
         return windowHeight;
     }
 
     /**
      * @param aWindowHeight the windowHeight to set
      */
-    public static void setHeight(int aWindowHeight){
+    public void setHeight(int aWindowHeight){
         windowHeight = aWindowHeight;
     }
 
     /**
      * @return the windowWidth
      */
-    public static int getWidth(){
+    public int getWidth(){
         return windowWidth;
     }
 
     /**
      * @param aWindowWidth the windowWidth to set
      */
-    public static void setWidth(int aWindowWidth){
+    public void setWidth(int aWindowWidth){
         windowWidth = aWindowWidth;
     }
   
