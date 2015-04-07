@@ -118,6 +118,7 @@ public class Game{
                 break;
             case MAIN_MENU:
                 //bind white before binding any textures
+                //render background
                 Color.white.bind();
                 menuBackground.bind();
                 GL11.glBegin(GL11.GL_QUADS);
@@ -133,7 +134,7 @@ public class Game{
                     GL11.glTexCoord2d(0, 1);
                     GL11.glVertex2i(0, 512);
                 GL11.glEnd();
-                
+                //render title
                 Color.white.bind();
                 title.bind();
                 GL11.glBegin(GL11.GL_QUADS);
@@ -152,6 +153,7 @@ public class Game{
                 
                 switch(menuSelection){
                     case 1:
+                        //render menu selections
                         Color.white.bind();
                         singleplayerSelected.bind();
                         GL11.glBegin(GL11.GL_QUADS);
