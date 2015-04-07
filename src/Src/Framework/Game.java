@@ -47,9 +47,11 @@ public class Game{
     
     ALContext context;
     ALDevice device;
+    //sources: places audio is played from
     int musicSource;
     int menuChangeSelectionSource;
     int selectSource;
+    //buffers: loaded audio
     int menuMusic;
     int menuChangeSelection;
     int select;
@@ -622,15 +624,25 @@ public class Game{
             GL11.glTexParameterf(GL11.GL_TEXTURE_2D, GL11.GL_TEXTURE_MAG_FILTER, GL11.GL_NEAREST);
                     
             //placeholder sounds
+            //load from file
             wavefile = WaveData.create("Src/Resources/Sounds/MMXTitleTheme.wav");
+            //store in buffer
             alBufferData(menuMusic, wavefile.format, wavefile.data, wavefile.samplerate);
+            //attach to source
             alSourcei(musicSource, AL_BUFFER, menuMusic);
+            //set source to loop
             alSourcei(musicSource, AL_LOOPING, AL_TRUE);
+            //load from file
             wavefile = WaveData.create("Src/Resources/Sounds/Blip_Select.wav");
+            //store in buffer
             alBufferData(menuChangeSelection, wavefile.format, wavefile.data, wavefile.samplerate);
+            //attach to source
             alSourcei(menuChangeSelectionSource, AL_BUFFER, menuChangeSelection);
+            //load from file
             wavefile = WaveData.create("Src/Resources/Sounds/blipChoose.wav");
+            //store in buffer
             alBufferData(select, wavefile.format, wavefile.data, wavefile.samplerate);
+            //attach to source
             alSourcei(selectSource, AL_BUFFER, select);
         } catch (IOException e){
                         e.printStackTrace();
@@ -648,6 +660,7 @@ public class Game{
                     case MAIN_MENU:
                         if ( key == GLFW_KEY_W && (action == GLFW_PRESS || action == GLFW_REPEAT)){
                             menuSelection-=1;
+                            //if selection would increment past limit then undo
                             if(menuSelection == 0){
                                 menuSelection+=1;
                             }else{
@@ -656,6 +669,7 @@ public class Game{
                         }
                         if ( key == GLFW_KEY_S && (action == GLFW_PRESS || action == GLFW_REPEAT)){
                             menuSelection+=1;
+                            //if selection would increment past limit then undo
                             if(menuSelection == 6){
                                 menuSelection-=1;
                             }else{
@@ -674,10 +688,9 @@ public class Game{
                                 case 4:
                                     break;
                                 case 5:
-                                    //while(select.isPlaying()){
-                                
-                                    //}
+                                    //tell main loop to exit
                                     glfwSetWindowShouldClose(window, GL_TRUE);
+                                    //close openAL
                                     device.destroy();
                                     break;
                                     
@@ -692,6 +705,7 @@ public class Game{
     }
     
     private void loadOpenAL(){
+        //ready openAL for use
         context = ALContext.create();
         device = context.getDevice();
         context.makeCurrent();
@@ -701,6 +715,7 @@ public class Game{
             throw new RuntimeException("OpenAL Context Creation failed");
         }
         
+        //setup source and buffer ints according to openAL standards
         musicSource = alGenSources();
         menuChangeSelectionSource = alGenSources();
         selectSource = alGenSources();
