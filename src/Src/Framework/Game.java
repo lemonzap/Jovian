@@ -18,8 +18,6 @@ import org.lwjgl.opengl.GL11;
 import static org.lwjgl.opengl.GL11.*;
 import static org.lwjgl.system.MemoryUtil.NULL;
 import org.newdawn.slick.Color;
-import org.newdawn.slick.openal.Audio;
-import org.newdawn.slick.openal.AudioLoader;
 import org.newdawn.slick.openal.WaveData;
 import org.newdawn.slick.opengl.Texture;
 import org.newdawn.slick.opengl.TextureLoader;
@@ -47,15 +45,10 @@ public class Game{
     
     ALContext context;
     ALDevice device;
-    //sources: places audio is played from
-    int musicSource;
-    int menuChangeSelectionSource;
-    int selectSource;
-    //buffers: loaded audio
-    int menuMusic;
-    int menuChangeSelection;
-    int select;
-    private WaveData wavefile;
+
+    Audio menuMusic;
+    Audio menuChangeSelection;
+    Audio menuSelect;
     
     //which option in a menu is currently selected from top to bottom
     int menuSelection = 1;
@@ -76,11 +69,12 @@ public class Game{
         
         while( glfwWindowShouldClose(window.getWindowHandle()) == GL_FALSE ) {
             
-            updateInputs();
+            //currently unused
+            //updateInputs();
             updateGame();
             render();
 
-            // Poll for window events
+            // Poll for window events(including inputs)
             glfwPollEvents();
         }
         
@@ -93,7 +87,7 @@ public class Game{
                 load();
                 initInputPolling();
                 gameState = GameState.MAIN_MENU;
-                alSourcePlay(musicSource);
+                menuMusic.play(true);
                 break;
             case MAIN_MENU:
                 break;
@@ -626,26 +620,9 @@ public class Game{
             GL11.glTexParameterf(GL11.GL_TEXTURE_2D, GL11.GL_TEXTURE_MAG_FILTER, GL11.GL_NEAREST);
                     
             //placeholder sounds
-            //load from file
-            wavefile = WaveData.create("Src/Resources/Sounds/MMXTitleTheme.wav");
-            //store in buffer
-            alBufferData(menuMusic, wavefile.format, wavefile.data, wavefile.samplerate);
-            //attach to source
-            alSourcei(musicSource, AL_BUFFER, menuMusic);
-            //set source to loop
-            alSourcei(musicSource, AL_LOOPING, AL_TRUE);
-            //load from file
-            wavefile = WaveData.create("Src/Resources/Sounds/Blip_Select.wav");
-            //store in buffer
-            alBufferData(menuChangeSelection, wavefile.format, wavefile.data, wavefile.samplerate);
-            //attach to source
-            alSourcei(menuChangeSelectionSource, AL_BUFFER, menuChangeSelection);
-            //load from file
-            wavefile = WaveData.create("Src/Resources/Sounds/blipChoose.wav");
-            //store in buffer
-            alBufferData(select, wavefile.format, wavefile.data, wavefile.samplerate);
-            //attach to source
-            alSourcei(selectSource, AL_BUFFER, select);
+            menuMusic = new Audio("Src/Resources/Sounds/MMXTitleTheme.wav", true);
+            menuChangeSelection = new Audio("Src/Resources/Sounds/Blip_Select.wav", false);
+            menuSelect = new Audio("Src/Resources/Sounds/blipChoose.wav", false);
         } catch (IOException e){
                         e.printStackTrace();
                     }
@@ -666,7 +643,7 @@ public class Game{
                             if(menuSelection == 0){
                                 menuSelection+=1;
                             }else{
-                                alSourcePlay(menuChangeSelectionSource);
+                                menuChangeSelection.play(false);
                             }
                         }
                         if ( key == GLFW_KEY_S && (action == GLFW_PRESS || action == GLFW_REPEAT)){
@@ -675,11 +652,11 @@ public class Game{
                             if(menuSelection == 6){
                                 menuSelection-=1;
                             }else{
-                                alSourcePlay(menuChangeSelectionSource);
+                                menuChangeSelection.play(false);
                             }
                         }
                         if ( key == GLFW_KEY_ENTER && (action == GLFW_RELEASE)){
-                            alSourcePlay(selectSource);
+                            menuSelect.play(false);
                             switch(menuSelection){
                                 case 1:
                                     break;
@@ -690,6 +667,10 @@ public class Game{
                                 case 4:
                                     break;
                                 case 5:
+                                    //wait for select sound to stop playing before closing
+                                    while(menuSelect.isPlaying()){
+                                        
+                                    }
                                     //tell main loop to exit
                                     glfwSetWindowShouldClose(window, GL_TRUE);
                                     //close openAL
@@ -718,13 +699,8 @@ public class Game{
         }
         
         //setup source and buffer ints according to openAL standards
-        musicSource = alGenSources();
-        menuChangeSelectionSource = alGenSources();
-        selectSource = alGenSources();
-        menuMusic = alGenBuffers();
-        menuChangeSelection = alGenBuffers();
-        select = alGenBuffers();
-        checkALError();
+        Audio.createMusicSource();
+        Audio.createSources(15);
     }
     
 }
