@@ -90,8 +90,19 @@ public class Window{
     glfwShowWindow(windowHandle);
     //sets up OpenGL Bindings for use
     GLContext.createFromCurrent();
+    
+    GL11.glEnable(GL11.GL_TEXTURE_2D);
     //set the clear color
     glClearColor(0.0f, 1.0f, 0.0f, 0.0f);
+    
+    // enable alpha blending
+    GL11.glEnable(GL11.GL_BLEND);
+    GL11.glBlendFunc(GL11.GL_SRC_ALPHA, GL11.GL_ONE_MINUS_SRC_ALPHA);
+
+    GL11.glViewport(0,0,windowWidth,windowHeight);
+    GL11.glOrtho(0, windowWidth, windowHeight, 0, 1, -1);
+    GL11.glMatrixMode(GL11.GL_MODELVIEW);
+    
   }
 
     /**
