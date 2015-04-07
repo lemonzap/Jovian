@@ -9,9 +9,18 @@ import java.io.IOException;
 import org.lwjgl.glfw.GLFW;
 import static org.lwjgl.glfw.GLFW.*;
 import org.lwjgl.glfw.GLFWKeyCallback;
+import org.lwjgl.openal.*;
+import org.lwjgl.openal.AL11;
+import org.lwjgl.openal.AL;
+import static org.lwjgl.openal.AL10.*;
+import static org.lwjgl.openal.Util.checkALError;
 import org.lwjgl.opengl.GL11;
 import static org.lwjgl.opengl.GL11.*;
+import static org.lwjgl.system.MemoryUtil.NULL;
 import org.newdawn.slick.Color;
+import org.newdawn.slick.openal.Audio;
+import org.newdawn.slick.openal.AudioLoader;
+import org.newdawn.slick.openal.WaveData;
 import org.newdawn.slick.opengl.Texture;
 import org.newdawn.slick.opengl.TextureLoader;
 import org.newdawn.slick.util.ResourceLoader;
@@ -35,6 +44,16 @@ public class Game{
     private Texture stageCreatorSelected;
     private Texture optionsSelected;
     private Texture exitSelected;
+    
+    ALContext context;
+    ALDevice device;
+    int musicSource;
+    int menuChangeSelectionSource;
+    int selectSource;
+    int menuMusic;
+    int menuChangeSelection;
+    int select;
+    private WaveData wavefile;
     
     //which option in a menu is currently selected from top to bottom
     int menuSelection = 1;
@@ -72,9 +91,9 @@ public class Game{
                 load();
                 initInputPolling();
                 gameState = GameState.MAIN_MENU;
+                alSourcePlay(musicSource);
                 break;
             case MAIN_MENU:
-                
                 break;
             case PLAYING:
                 
@@ -575,32 +594,45 @@ public class Game{
         glfwSwapBuffers(window.getWindowHandle());
         
         //loading resources for main menu
+        loadOpenAL();
         try{
-                        menuBackground = TextureLoader.getTexture("PNG", ResourceLoader.getResourceAsStream("Src/Resources/Images/MainMenu.png"));
-                        GL11.glTexParameterf(GL11.GL_TEXTURE_2D, GL11.GL_TEXTURE_MAG_FILTER, GL11.GL_NEAREST);
-                        title = TextureLoader.getTexture("PNG", ResourceLoader.getResourceAsStream("Src/Resources/Images/Title.png"));
-                        GL11.glTexParameterf(GL11.GL_TEXTURE_2D, GL11.GL_TEXTURE_MAG_FILTER, GL11.GL_NEAREST);
-                        singleplayer = TextureLoader.getTexture("PNG", ResourceLoader.getResourceAsStream("Src/Resources/Images/Singleplayer.png"));
-                        GL11.glTexParameterf(GL11.GL_TEXTURE_2D, GL11.GL_TEXTURE_MAG_FILTER, GL11.GL_NEAREST);
-                        singleplayerSelected = TextureLoader.getTexture("PNG", ResourceLoader.getResourceAsStream("Src/Resources/Images/SingleplayerSelected.png"));
-                        GL11.glTexParameterf(GL11.GL_TEXTURE_2D, GL11.GL_TEXTURE_MAG_FILTER, GL11.GL_NEAREST);
-                        multiplayer = TextureLoader.getTexture("PNG", ResourceLoader.getResourceAsStream("Src/Resources/Images/Multiplayer.png"));
-                        GL11.glTexParameterf(GL11.GL_TEXTURE_2D, GL11.GL_TEXTURE_MAG_FILTER, GL11.GL_NEAREST);
-                        multiplayerSelected = TextureLoader.getTexture("PNG", ResourceLoader.getResourceAsStream("Src/Resources/Images/MultiplayerSelected.png"));
-                        GL11.glTexParameterf(GL11.GL_TEXTURE_2D, GL11.GL_TEXTURE_MAG_FILTER, GL11.GL_NEAREST);
-                        stageCreator = TextureLoader.getTexture("PNG", ResourceLoader.getResourceAsStream("Src/Resources/Images/StageCreator.png"));
-                        GL11.glTexParameterf(GL11.GL_TEXTURE_2D, GL11.GL_TEXTURE_MAG_FILTER, GL11.GL_NEAREST);
-                        stageCreatorSelected = TextureLoader.getTexture("PNG", ResourceLoader.getResourceAsStream("Src/Resources/Images/StageCreatorSelected.png"));
-                        GL11.glTexParameterf(GL11.GL_TEXTURE_2D, GL11.GL_TEXTURE_MAG_FILTER, GL11.GL_NEAREST);
-                        options = TextureLoader.getTexture("PNG", ResourceLoader.getResourceAsStream("Src/Resources/Images/Options.png"));
-                        GL11.glTexParameterf(GL11.GL_TEXTURE_2D, GL11.GL_TEXTURE_MAG_FILTER, GL11.GL_NEAREST);
-                        optionsSelected = TextureLoader.getTexture("PNG", ResourceLoader.getResourceAsStream("Src/Resources/Images/OptionsSelected.png"));
-                        GL11.glTexParameterf(GL11.GL_TEXTURE_2D, GL11.GL_TEXTURE_MAG_FILTER, GL11.GL_NEAREST);
-                        exit = TextureLoader.getTexture("PNG", ResourceLoader.getResourceAsStream("Src/Resources/Images/Exit.png"));
-                        GL11.glTexParameterf(GL11.GL_TEXTURE_2D, GL11.GL_TEXTURE_MAG_FILTER, GL11.GL_NEAREST);
-                        exitSelected = TextureLoader.getTexture("PNG", ResourceLoader.getResourceAsStream("Src/Resources/Images/ExitSelected.png"));
-                        GL11.glTexParameterf(GL11.GL_TEXTURE_2D, GL11.GL_TEXTURE_MAG_FILTER, GL11.GL_NEAREST);
-                    } catch (IOException e){
+            menuBackground = TextureLoader.getTexture("PNG", ResourceLoader.getResourceAsStream("Src/Resources/Images/MainMenu.png"));
+            GL11.glTexParameterf(GL11.GL_TEXTURE_2D, GL11.GL_TEXTURE_MAG_FILTER, GL11.GL_NEAREST);
+            title = TextureLoader.getTexture("PNG", ResourceLoader.getResourceAsStream("Src/Resources/Images/Title.png"));
+            GL11.glTexParameterf(GL11.GL_TEXTURE_2D, GL11.GL_TEXTURE_MAG_FILTER, GL11.GL_NEAREST);
+            singleplayer = TextureLoader.getTexture("PNG", ResourceLoader.getResourceAsStream("Src/Resources/Images/Singleplayer.png"));
+            GL11.glTexParameterf(GL11.GL_TEXTURE_2D, GL11.GL_TEXTURE_MAG_FILTER, GL11.GL_NEAREST);
+            singleplayerSelected = TextureLoader.getTexture("PNG", ResourceLoader.getResourceAsStream("Src/Resources/Images/SingleplayerSelected.png"));
+            GL11.glTexParameterf(GL11.GL_TEXTURE_2D, GL11.GL_TEXTURE_MAG_FILTER, GL11.GL_NEAREST);
+            multiplayer = TextureLoader.getTexture("PNG", ResourceLoader.getResourceAsStream("Src/Resources/Images/Multiplayer.png"));
+            GL11.glTexParameterf(GL11.GL_TEXTURE_2D, GL11.GL_TEXTURE_MAG_FILTER, GL11.GL_NEAREST);
+            multiplayerSelected = TextureLoader.getTexture("PNG", ResourceLoader.getResourceAsStream("Src/Resources/Images/MultiplayerSelected.png"));
+            GL11.glTexParameterf(GL11.GL_TEXTURE_2D, GL11.GL_TEXTURE_MAG_FILTER, GL11.GL_NEAREST);
+            stageCreator = TextureLoader.getTexture("PNG", ResourceLoader.getResourceAsStream("Src/Resources/Images/StageCreator.png"));
+            GL11.glTexParameterf(GL11.GL_TEXTURE_2D, GL11.GL_TEXTURE_MAG_FILTER, GL11.GL_NEAREST);
+            stageCreatorSelected = TextureLoader.getTexture("PNG", ResourceLoader.getResourceAsStream("Src/Resources/Images/StageCreatorSelected.png"));
+            GL11.glTexParameterf(GL11.GL_TEXTURE_2D, GL11.GL_TEXTURE_MAG_FILTER, GL11.GL_NEAREST);
+            options = TextureLoader.getTexture("PNG", ResourceLoader.getResourceAsStream("Src/Resources/Images/Options.png"));
+            GL11.glTexParameterf(GL11.GL_TEXTURE_2D, GL11.GL_TEXTURE_MAG_FILTER, GL11.GL_NEAREST);
+            optionsSelected = TextureLoader.getTexture("PNG", ResourceLoader.getResourceAsStream("Src/Resources/Images/OptionsSelected.png"));
+            GL11.glTexParameterf(GL11.GL_TEXTURE_2D, GL11.GL_TEXTURE_MAG_FILTER, GL11.GL_NEAREST);
+            exit = TextureLoader.getTexture("PNG", ResourceLoader.getResourceAsStream("Src/Resources/Images/Exit.png"));
+            GL11.glTexParameterf(GL11.GL_TEXTURE_2D, GL11.GL_TEXTURE_MAG_FILTER, GL11.GL_NEAREST);
+            exitSelected = TextureLoader.getTexture("PNG", ResourceLoader.getResourceAsStream("Src/Resources/Images/ExitSelected.png"));
+            GL11.glTexParameterf(GL11.GL_TEXTURE_2D, GL11.GL_TEXTURE_MAG_FILTER, GL11.GL_NEAREST);
+                    
+            //placeholder sounds
+            wavefile = WaveData.create("Src/Resources/Sounds/MMXTitleTheme.wav");
+            alBufferData(menuMusic, wavefile.format, wavefile.data, wavefile.samplerate);
+            alSourcei(musicSource, AL_BUFFER, menuMusic);
+            alSourcei(musicSource, AL_LOOPING, AL_TRUE);
+            wavefile = WaveData.create("Src/Resources/Sounds/Blip_Select.wav");
+            alBufferData(menuChangeSelection, wavefile.format, wavefile.data, wavefile.samplerate);
+            alSourcei(menuChangeSelectionSource, AL_BUFFER, menuChangeSelection);
+            wavefile = WaveData.create("Src/Resources/Sounds/blipChoose.wav");
+            alBufferData(select, wavefile.format, wavefile.data, wavefile.samplerate);
+            alSourcei(selectSource, AL_BUFFER, select);
+        } catch (IOException e){
                         e.printStackTrace();
                     }
         
@@ -618,15 +650,20 @@ public class Game{
                             menuSelection-=1;
                             if(menuSelection == 0){
                                 menuSelection+=1;
+                            }else{
+                                alSourcePlay(menuChangeSelectionSource);
                             }
                         }
                         if ( key == GLFW_KEY_S && (action == GLFW_PRESS || action == GLFW_REPEAT)){
                             menuSelection+=1;
                             if(menuSelection == 6){
                                 menuSelection-=1;
+                            }else{
+                                alSourcePlay(menuChangeSelectionSource);
                             }
                         }
                         if ( key == GLFW_KEY_ENTER && (action == GLFW_RELEASE)){
+                            alSourcePlay(selectSource);
                             switch(menuSelection){
                                 case 1:
                                     break;
@@ -637,7 +674,11 @@ public class Game{
                                 case 4:
                                     break;
                                 case 5:
+                                    //while(select.isPlaying()){
+                                
+                                    //}
                                     glfwSetWindowShouldClose(window, GL_TRUE);
+                                    device.destroy();
                                     break;
                                     
                             }
@@ -648,6 +689,25 @@ public class Game{
                 }
             }
         });
+    }
+    
+    private void loadOpenAL(){
+        context = ALContext.create();
+        device = context.getDevice();
+        context.makeCurrent();
+        ALCCapabilities capabilities = device.getCapabilities();
+ 
+        if (!capabilities.OpenALC10){
+            throw new RuntimeException("OpenAL Context Creation failed");
+        }
+        
+        musicSource = alGenSources();
+        menuChangeSelectionSource = alGenSources();
+        selectSource = alGenSources();
+        menuMusic = alGenBuffers();
+        menuChangeSelection = alGenBuffers();
+        select = alGenBuffers();
+        checkALError();
     }
     
 }
