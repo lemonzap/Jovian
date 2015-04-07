@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!DOCTYPE log SYSTEM "logger.dtd">
+<log>
+<record>
+  <date>2015-04-06T04:45:48</date>
+  <millis>1428320748423</millis>
+  <sequence>0</sequence>
+  <logger>Src.Framework.Window</logger>
+  <level>SEVERE</level>
+  <class>Src.Framework.Window</class>
+  <method>main</method>
+  <thread>1</thread>
+  <message>java.lang.RuntimeException: Failed to create the GLFW window</message>
+  <exception>
+    <message>java.lang.RuntimeException: Failed to create the GLFW window</message>
+    <frame>
+      <class>Src.Framework.Window</class>
+      <method>create</method>
+      <line>67</line>
+    </frame>
+    <frame>
+      <class>Src.Framework.Window</class>
+      <method>main</method>
+      <line>46</line>
+    </frame>
+  </exception>
+</record>
+</log>
