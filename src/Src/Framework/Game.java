@@ -5,6 +5,7 @@
  */
 package Src.Framework;
 
+import Src.Framework.Menus.MainMenu;
 import java.io.IOException;
 import org.lwjgl.glfw.GLFW;
 import static org.lwjgl.glfw.GLFW.*;
@@ -30,18 +31,6 @@ public class Game{
     Window window;
     
     private Texture logo;
-    private Texture menuBackground;
-    private Texture title;
-    private Texture singleplayer;
-    private Texture multiplayer;
-    private Texture stageCreator;
-    private Texture options;
-    private Texture exit;
-    private Texture singleplayerSelected;
-    private Texture multiplayerSelected;
-    private Texture stageCreatorSelected;
-    private Texture optionsSelected;
-    private Texture exitSelected;
     
     ALContext context;
     ALDevice device;
@@ -111,449 +100,8 @@ public class Game{
             case STARTING:
                 break;
             case MAIN_MENU:
-                //bind white before binding any textures
-                //render background
-                Color.white.bind();
-                menuBackground.bind();
-                GL11.glBegin(GL11.GL_QUADS);
-                    GL11.glTexCoord2d(0, 0);
-                    GL11.glVertex2i(0, 0);
-                    
-                    GL11.glTexCoord2d(1, 0);
-                    GL11.glVertex2i(1024, 0);
-                    
-                    GL11.glTexCoord2d(1, 1);
-                    GL11.glVertex2i(1024, 512);
-                    
-                    GL11.glTexCoord2d(0, 1);
-                    GL11.glVertex2i(0, 512);
-                GL11.glEnd();
-                //render title
-                Color.white.bind();
-                title.bind();
-                GL11.glBegin(GL11.GL_QUADS);
-                    GL11.glTexCoord2d(0, 0);
-                    GL11.glVertex2i(256, 0);
-                    
-                    GL11.glTexCoord2d(1, 0);
-                    GL11.glVertex2i(768, 0);
-                    
-                    GL11.glTexCoord2d(1, 1);
-                    GL11.glVertex2i(768, 167);
-                    
-                    GL11.glTexCoord2d(0, 1);
-                    GL11.glVertex2i(256, 167);
-                GL11.glEnd();
                 
-                switch(menuSelection){
-                    case 1:
-                        //render menu selections
-                        Color.white.bind();
-                        singleplayerSelected.bind();
-                        GL11.glBegin(GL11.GL_QUADS);
-                            GL11.glTexCoord2d(0, 0);
-                            GL11.glVertex2i(256, 192);
-
-                            GL11.glTexCoord2d(1, 0);
-                            GL11.glVertex2i(768, 192);
-
-                            GL11.glTexCoord2d(1, 1);
-                            GL11.glVertex2i(768, 256);
-
-                            GL11.glTexCoord2d(0, 1);
-                            GL11.glVertex2i(256, 256);
-                        GL11.glEnd();
-                        
-                        Color.white.bind();
-                        multiplayer.bind();
-                        GL11.glBegin(GL11.GL_QUADS);
-                            GL11.glTexCoord2d(0, 0);
-                            GL11.glVertex2i(256, 256);
-
-                            GL11.glTexCoord2d(1, 0);
-                            GL11.glVertex2i(768, 256);
-
-                            GL11.glTexCoord2d(1, 1);
-                            GL11.glVertex2i(768, 320);
-
-                            GL11.glTexCoord2d(0, 1);
-                            GL11.glVertex2i(256, 320);
-                        GL11.glEnd();
-                        
-                        Color.white.bind();
-                        stageCreator.bind();
-                        GL11.glBegin(GL11.GL_QUADS);
-                            GL11.glTexCoord2d(0, 0);
-                            GL11.glVertex2i(256, 320);
-
-                            GL11.glTexCoord2d(1, 0);
-                            GL11.glVertex2i(768, 320);
-
-                            GL11.glTexCoord2d(1, 1);
-                            GL11.glVertex2i(768, 384);
-
-                            GL11.glTexCoord2d(0, 1);
-                            GL11.glVertex2i(256, 384);
-                        GL11.glEnd();
-                        
-                        Color.white.bind();
-                        options.bind();
-                        GL11.glBegin(GL11.GL_QUADS);
-                            GL11.glTexCoord2d(0, 0);
-                            GL11.glVertex2i(256, 384);
-
-                            GL11.glTexCoord2d(1, 0);
-                            GL11.glVertex2i(768, 384);
-
-                            GL11.glTexCoord2d(1, 1);
-                            GL11.glVertex2i(768, 448);
-
-                            GL11.glTexCoord2d(0, 1);
-                            GL11.glVertex2i(256, 448);
-                        GL11.glEnd();
-                        
-                        Color.white.bind();
-                        exit.bind();
-                        GL11.glBegin(GL11.GL_QUADS);
-                            GL11.glTexCoord2d(0, 0);
-                            GL11.glVertex2i(256, 448);
-
-                            GL11.glTexCoord2d(1, 0);
-                            GL11.glVertex2i(768, 448);
-
-                            GL11.glTexCoord2d(1, 1);
-                            GL11.glVertex2i(768, 512);
-
-                            GL11.glTexCoord2d(0, 1);
-                            GL11.glVertex2i(256, 512);
-                        GL11.glEnd();
-                        break;
-                    case 2:
-                        Color.white.bind();
-                        singleplayer.bind();
-                        GL11.glBegin(GL11.GL_QUADS);
-                            GL11.glTexCoord2d(0, 0);
-                            GL11.glVertex2i(256, 192);
-
-                            GL11.glTexCoord2d(1, 0);
-                            GL11.glVertex2i(768, 192);
-
-                            GL11.glTexCoord2d(1, 1);
-                            GL11.glVertex2i(768, 256);
-
-                            GL11.glTexCoord2d(0, 1);
-                            GL11.glVertex2i(256, 256);
-                        GL11.glEnd();
-                        
-                        Color.white.bind();
-                        multiplayerSelected.bind();
-                        GL11.glBegin(GL11.GL_QUADS);
-                            GL11.glTexCoord2d(0, 0);
-                            GL11.glVertex2i(256, 256);
-
-                            GL11.glTexCoord2d(1, 0);
-                            GL11.glVertex2i(768, 256);
-
-                            GL11.glTexCoord2d(1, 1);
-                            GL11.glVertex2i(768, 320);
-
-                            GL11.glTexCoord2d(0, 1);
-                            GL11.glVertex2i(256, 320);
-                        GL11.glEnd();
-                        
-                        Color.white.bind();
-                        stageCreator.bind();
-                        GL11.glBegin(GL11.GL_QUADS);
-                            GL11.glTexCoord2d(0, 0);
-                            GL11.glVertex2i(256, 320);
-
-                            GL11.glTexCoord2d(1, 0);
-                            GL11.glVertex2i(768, 320);
-
-                            GL11.glTexCoord2d(1, 1);
-                            GL11.glVertex2i(768, 384);
-
-                            GL11.glTexCoord2d(0, 1);
-                            GL11.glVertex2i(256, 384);
-                        GL11.glEnd();
-                        
-                        Color.white.bind();
-                        options.bind();
-                        GL11.glBegin(GL11.GL_QUADS);
-                            GL11.glTexCoord2d(0, 0);
-                            GL11.glVertex2i(256, 384);
-
-                            GL11.glTexCoord2d(1, 0);
-                            GL11.glVertex2i(768, 384);
-
-                            GL11.glTexCoord2d(1, 1);
-                            GL11.glVertex2i(768, 448);
-
-                            GL11.glTexCoord2d(0, 1);
-                            GL11.glVertex2i(256, 448);
-                        GL11.glEnd();
-                        
-                        Color.white.bind();
-                        exit.bind();
-                        GL11.glBegin(GL11.GL_QUADS);
-                            GL11.glTexCoord2d(0, 0);
-                            GL11.glVertex2i(256, 448);
-
-                            GL11.glTexCoord2d(1, 0);
-                            GL11.glVertex2i(768, 448);
-
-                            GL11.glTexCoord2d(1, 1);
-                            GL11.glVertex2i(768, 512);
-
-                            GL11.glTexCoord2d(0, 1);
-                            GL11.glVertex2i(256, 512);
-                        GL11.glEnd();
-                        break;
-                    case 3:
-                        Color.white.bind();
-                        singleplayer.bind();
-                        GL11.glBegin(GL11.GL_QUADS);
-                            GL11.glTexCoord2d(0, 0);
-                            GL11.glVertex2i(256, 192);
-
-                            GL11.glTexCoord2d(1, 0);
-                            GL11.glVertex2i(768, 192);
-
-                            GL11.glTexCoord2d(1, 1);
-                            GL11.glVertex2i(768, 256);
-
-                            GL11.glTexCoord2d(0, 1);
-                            GL11.glVertex2i(256, 256);
-                        GL11.glEnd();
-                        
-                        Color.white.bind();
-                        multiplayer.bind();
-                        GL11.glBegin(GL11.GL_QUADS);
-                            GL11.glTexCoord2d(0, 0);
-                            GL11.glVertex2i(256, 256);
-
-                            GL11.glTexCoord2d(1, 0);
-                            GL11.glVertex2i(768, 256);
-
-                            GL11.glTexCoord2d(1, 1);
-                            GL11.glVertex2i(768, 320);
-
-                            GL11.glTexCoord2d(0, 1);
-                            GL11.glVertex2i(256, 320);
-                        GL11.glEnd();
-                        
-                        Color.white.bind();
-                        stageCreatorSelected.bind();
-                        GL11.glBegin(GL11.GL_QUADS);
-                            GL11.glTexCoord2d(0, 0);
-                            GL11.glVertex2i(256, 320);
-
-                            GL11.glTexCoord2d(1, 0);
-                            GL11.glVertex2i(768, 320);
-
-                            GL11.glTexCoord2d(1, 1);
-                            GL11.glVertex2i(768, 384);
-
-                            GL11.glTexCoord2d(0, 1);
-                            GL11.glVertex2i(256, 384);
-                        GL11.glEnd();
-                        
-                        Color.white.bind();
-                        options.bind();
-                        GL11.glBegin(GL11.GL_QUADS);
-                            GL11.glTexCoord2d(0, 0);
-                            GL11.glVertex2i(256, 384);
-
-                            GL11.glTexCoord2d(1, 0);
-                            GL11.glVertex2i(768, 384);
-
-                            GL11.glTexCoord2d(1, 1);
-                            GL11.glVertex2i(768, 448);
-
-                            GL11.glTexCoord2d(0, 1);
-                            GL11.glVertex2i(256, 448);
-                        GL11.glEnd();
-                        
-                        Color.white.bind();
-                        exit.bind();
-                        GL11.glBegin(GL11.GL_QUADS);
-                            GL11.glTexCoord2d(0, 0);
-                            GL11.glVertex2i(256, 448);
-
-                            GL11.glTexCoord2d(1, 0);
-                            GL11.glVertex2i(768, 448);
-
-                            GL11.glTexCoord2d(1, 1);
-                            GL11.glVertex2i(768, 512);
-
-                            GL11.glTexCoord2d(0, 1);
-                            GL11.glVertex2i(256, 512);
-                        GL11.glEnd();
-                        break;
-                    case 4:
-                        Color.white.bind();
-                        singleplayer.bind();
-                        GL11.glBegin(GL11.GL_QUADS);
-                            GL11.glTexCoord2d(0, 0);
-                            GL11.glVertex2i(256, 192);
-
-                            GL11.glTexCoord2d(1, 0);
-                            GL11.glVertex2i(768, 192);
-
-                            GL11.glTexCoord2d(1, 1);
-                            GL11.glVertex2i(768, 256);
-
-                            GL11.glTexCoord2d(0, 1);
-                            GL11.glVertex2i(256, 256);
-                        GL11.glEnd();
-                        
-                        Color.white.bind();
-                        multiplayer.bind();
-                        GL11.glBegin(GL11.GL_QUADS);
-                            GL11.glTexCoord2d(0, 0);
-                            GL11.glVertex2i(256, 256);
-
-                            GL11.glTexCoord2d(1, 0);
-                            GL11.glVertex2i(768, 256);
-
-                            GL11.glTexCoord2d(1, 1);
-                            GL11.glVertex2i(768, 320);
-
-                            GL11.glTexCoord2d(0, 1);
-                            GL11.glVertex2i(256, 320);
-                        GL11.glEnd();
-                        
-                        Color.white.bind();
-                        stageCreator.bind();
-                        GL11.glBegin(GL11.GL_QUADS);
-                            GL11.glTexCoord2d(0, 0);
-                            GL11.glVertex2i(256, 320);
-
-                            GL11.glTexCoord2d(1, 0);
-                            GL11.glVertex2i(768, 320);
-
-                            GL11.glTexCoord2d(1, 1);
-                            GL11.glVertex2i(768, 384);
-
-                            GL11.glTexCoord2d(0, 1);
-                            GL11.glVertex2i(256, 384);
-                        GL11.glEnd();
-                        
-                        Color.white.bind();
-                        optionsSelected.bind();
-                        GL11.glBegin(GL11.GL_QUADS);
-                            GL11.glTexCoord2d(0, 0);
-                            GL11.glVertex2i(256, 384);
-
-                            GL11.glTexCoord2d(1, 0);
-                            GL11.glVertex2i(768, 384);
-
-                            GL11.glTexCoord2d(1, 1);
-                            GL11.glVertex2i(768, 448);
-
-                            GL11.glTexCoord2d(0, 1);
-                            GL11.glVertex2i(256, 448);
-                        GL11.glEnd();
-                        
-                        Color.white.bind();
-                        exit.bind();
-                        GL11.glBegin(GL11.GL_QUADS);
-                            GL11.glTexCoord2d(0, 0);
-                            GL11.glVertex2i(256, 448);
-
-                            GL11.glTexCoord2d(1, 0);
-                            GL11.glVertex2i(768, 448);
-
-                            GL11.glTexCoord2d(1, 1);
-                            GL11.glVertex2i(768, 512);
-
-                            GL11.glTexCoord2d(0, 1);
-                            GL11.glVertex2i(256, 512);
-                        GL11.glEnd();
-                        break;
-                    case 5:
-                        Color.white.bind();
-                        singleplayer.bind();
-                        GL11.glBegin(GL11.GL_QUADS);
-                            GL11.glTexCoord2d(0, 0);
-                            GL11.glVertex2i(256, 192);
-
-                            GL11.glTexCoord2d(1, 0);
-                            GL11.glVertex2i(768, 192);
-
-                            GL11.glTexCoord2d(1, 1);
-                            GL11.glVertex2i(768, 256);
-
-                            GL11.glTexCoord2d(0, 1);
-                            GL11.glVertex2i(256, 256);
-                        GL11.glEnd();
-                        
-                        Color.white.bind();
-                        multiplayer.bind();
-                        GL11.glBegin(GL11.GL_QUADS);
-                            GL11.glTexCoord2d(0, 0);
-                            GL11.glVertex2i(256, 256);
-
-                            GL11.glTexCoord2d(1, 0);
-                            GL11.glVertex2i(768, 256);
-
-                            GL11.glTexCoord2d(1, 1);
-                            GL11.glVertex2i(768, 320);
-
-                            GL11.glTexCoord2d(0, 1);
-                            GL11.glVertex2i(256, 320);
-                        GL11.glEnd();
-                        
-                        Color.white.bind();
-                        stageCreator.bind();
-                        GL11.glBegin(GL11.GL_QUADS);
-                            GL11.glTexCoord2d(0, 0);
-                            GL11.glVertex2i(256, 320);
-
-                            GL11.glTexCoord2d(1, 0);
-                            GL11.glVertex2i(768, 320);
-
-                            GL11.glTexCoord2d(1, 1);
-                            GL11.glVertex2i(768, 384);
-
-                            GL11.glTexCoord2d(0, 1);
-                            GL11.glVertex2i(256, 384);
-                        GL11.glEnd();
-                        
-                        Color.white.bind();
-                        options.bind();
-                        GL11.glBegin(GL11.GL_QUADS);
-                            GL11.glTexCoord2d(0, 0);
-                            GL11.glVertex2i(256, 384);
-
-                            GL11.glTexCoord2d(1, 0);
-                            GL11.glVertex2i(768, 384);
-
-                            GL11.glTexCoord2d(1, 1);
-                            GL11.glVertex2i(768, 448);
-
-                            GL11.glTexCoord2d(0, 1);
-                            GL11.glVertex2i(256, 448);
-                        GL11.glEnd();
-                        
-                        Color.white.bind();
-                        exitSelected.bind();
-                        GL11.glBegin(GL11.GL_QUADS);
-                            GL11.glTexCoord2d(0, 0);
-                            GL11.glVertex2i(256, 448);
-
-                            GL11.glTexCoord2d(1, 0);
-                            GL11.glVertex2i(768, 448);
-
-                            GL11.glTexCoord2d(1, 1);
-                            GL11.glVertex2i(768, 512);
-
-                            GL11.glTexCoord2d(0, 1);
-                            GL11.glVertex2i(256, 512);
-                        GL11.glEnd();
-                        break;
-                        
-                }
+                MainMenu.render();
                 
                 break;
             case PLAYING:
@@ -568,11 +116,11 @@ public class Game{
     private void load(){
         //load splash screen and display it before loading everything else
         try{
-                        logo = TextureLoader.getTexture("PNG", ResourceLoader.getResourceAsStream("Src/Resources/Images/LemonzapLogo.png"));
-                        GL11.glTexParameterf(GL11.GL_TEXTURE_2D, GL11.GL_TEXTURE_MAG_FILTER, GL11.GL_NEAREST);
-                    } catch (IOException e){
-                        e.printStackTrace();
-                    }
+            logo = TextureLoader.getTexture("PNG", ResourceLoader.getResourceAsStream("Src/Resources/Images/LemonzapLogo.png"));
+            GL11.glTexParameterf(GL11.GL_TEXTURE_2D, GL11.GL_TEXTURE_MAG_FILTER, GL11.GL_NEAREST);
+        } catch (IOException e){
+            e.printStackTrace();
+        }
         //bind white before binding any textures
         Color.white.bind();
         logo.bind();
@@ -593,40 +141,11 @@ public class Game{
         
         //loading resources for main menu
         loadOpenAL();
-        try{
-            menuBackground = TextureLoader.getTexture("PNG", ResourceLoader.getResourceAsStream("Src/Resources/Images/MainMenu.png"));
-            GL11.glTexParameterf(GL11.GL_TEXTURE_2D, GL11.GL_TEXTURE_MAG_FILTER, GL11.GL_NEAREST);
-            title = TextureLoader.getTexture("PNG", ResourceLoader.getResourceAsStream("Src/Resources/Images/Title.png"));
-            GL11.glTexParameterf(GL11.GL_TEXTURE_2D, GL11.GL_TEXTURE_MAG_FILTER, GL11.GL_NEAREST);
-            singleplayer = TextureLoader.getTexture("PNG", ResourceLoader.getResourceAsStream("Src/Resources/Images/Singleplayer.png"));
-            GL11.glTexParameterf(GL11.GL_TEXTURE_2D, GL11.GL_TEXTURE_MAG_FILTER, GL11.GL_NEAREST);
-            singleplayerSelected = TextureLoader.getTexture("PNG", ResourceLoader.getResourceAsStream("Src/Resources/Images/SingleplayerSelected.png"));
-            GL11.glTexParameterf(GL11.GL_TEXTURE_2D, GL11.GL_TEXTURE_MAG_FILTER, GL11.GL_NEAREST);
-            multiplayer = TextureLoader.getTexture("PNG", ResourceLoader.getResourceAsStream("Src/Resources/Images/Multiplayer.png"));
-            GL11.glTexParameterf(GL11.GL_TEXTURE_2D, GL11.GL_TEXTURE_MAG_FILTER, GL11.GL_NEAREST);
-            multiplayerSelected = TextureLoader.getTexture("PNG", ResourceLoader.getResourceAsStream("Src/Resources/Images/MultiplayerSelected.png"));
-            GL11.glTexParameterf(GL11.GL_TEXTURE_2D, GL11.GL_TEXTURE_MAG_FILTER, GL11.GL_NEAREST);
-            stageCreator = TextureLoader.getTexture("PNG", ResourceLoader.getResourceAsStream("Src/Resources/Images/StageCreator.png"));
-            GL11.glTexParameterf(GL11.GL_TEXTURE_2D, GL11.GL_TEXTURE_MAG_FILTER, GL11.GL_NEAREST);
-            stageCreatorSelected = TextureLoader.getTexture("PNG", ResourceLoader.getResourceAsStream("Src/Resources/Images/StageCreatorSelected.png"));
-            GL11.glTexParameterf(GL11.GL_TEXTURE_2D, GL11.GL_TEXTURE_MAG_FILTER, GL11.GL_NEAREST);
-            options = TextureLoader.getTexture("PNG", ResourceLoader.getResourceAsStream("Src/Resources/Images/Options.png"));
-            GL11.glTexParameterf(GL11.GL_TEXTURE_2D, GL11.GL_TEXTURE_MAG_FILTER, GL11.GL_NEAREST);
-            optionsSelected = TextureLoader.getTexture("PNG", ResourceLoader.getResourceAsStream("Src/Resources/Images/OptionsSelected.png"));
-            GL11.glTexParameterf(GL11.GL_TEXTURE_2D, GL11.GL_TEXTURE_MAG_FILTER, GL11.GL_NEAREST);
-            exit = TextureLoader.getTexture("PNG", ResourceLoader.getResourceAsStream("Src/Resources/Images/Exit.png"));
-            GL11.glTexParameterf(GL11.GL_TEXTURE_2D, GL11.GL_TEXTURE_MAG_FILTER, GL11.GL_NEAREST);
-            exitSelected = TextureLoader.getTexture("PNG", ResourceLoader.getResourceAsStream("Src/Resources/Images/ExitSelected.png"));
-            GL11.glTexParameterf(GL11.GL_TEXTURE_2D, GL11.GL_TEXTURE_MAG_FILTER, GL11.GL_NEAREST);
-                    
-            //placeholder sounds
-            menuMusic = new Audio("Src/Resources/Sounds/MMXTitleTheme.wav", true);
-            menuChangeSelection = new Audio("Src/Resources/Sounds/Blip_Select.wav", false);
-            menuSelect = new Audio("Src/Resources/Sounds/blipChoose.wav", false);
-        } catch (IOException e){
-                        e.printStackTrace();
-                    }
-        
+        MainMenu.load();  
+        //placeholder sounds
+        menuMusic = new Audio("Src/Resources/Sounds/MMXTitleTheme.wav", true);
+        menuChangeSelection = new Audio("Src/Resources/Sounds/Blip_Select.wav", false);
+        menuSelect = new Audio("Src/Resources/Sounds/blipChoose.wav", false);
         
     }
     
@@ -643,6 +162,7 @@ public class Game{
                             if(menuSelection == 0){
                                 menuSelection+=1;
                             }else{
+                                MainMenu.setSelection(menuSelection);
                                 menuChangeSelection.play(false);
                             }
                         }
@@ -652,6 +172,7 @@ public class Game{
                             if(menuSelection == 6){
                                 menuSelection-=1;
                             }else{
+                                MainMenu.setSelection(menuSelection);
                                 menuChangeSelection.play(false);
                             }
                         }
