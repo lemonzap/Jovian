@@ -6,6 +6,7 @@
 package Src.Framework;
 
 import Src.Framework.Menus.MainMenu;
+import Src.Framework.Menus.OptionsAudioMenu;
 import Src.Framework.Menus.OptionsMenu;
 import java.io.IOException;
 import org.lwjgl.glfw.GLFW;
@@ -37,16 +38,13 @@ public class Game{
     
     private Texture logo;
     
-    ALContext context;
-    ALDevice device;
-    
     //which option in a menu is currently selected from top to bottom
     int menuSelection = 1;
     private GLFWKeyCallback keyCallBack;
     
     //Possible states of the game
     private enum GameState{STARTING, MAIN_MENU, PLAYING}
-    public enum MenuState{MAIN_MENU, SINGLEPLAYER_MENU, MULTIPLAYER_MENU, STAGE_CREATOR_MENU, OPTIONS_MENU}
+    public enum MenuState{MAIN_MENU, SINGLEPLAYER_MENU, MULTIPLAYER_MENU, STAGE_CREATOR_MENU, OPTIONS_MENU, AUDIO_OPTIONS_MENU}
     
     private GameState gameState;
     private MenuState menuState;
@@ -86,7 +84,7 @@ public class Game{
             glfwPollEvents();
         }
         //close openAL
-        device.destroy();
+        Audio.device.destroy();
     }
     
     //per frame game logic
@@ -129,6 +127,8 @@ public class Game{
                             case OPTIONS_MENU:
                                 OptionsMenu.render();
                                 break;
+                            case AUDIO_OPTIONS_MENU:
+                                OptionsAudioMenu.render();
                         }
                 
                 break;
@@ -168,9 +168,10 @@ public class Game{
         glfwSwapBuffers(window.getWindowHandle());
         
         //loading resources for main menu
-        loadOpenAL();
+        Audio.loadOpenAL();
         MainMenu.load();
         OptionsMenu.load();
+        OptionsAudioMenu.load();
         
     }
     
@@ -196,6 +197,8 @@ public class Game{
                             case OPTIONS_MENU:
                                 OptionsMenu.handleInputs(window, key, scancode, action, mods);
                                 break;
+                            case AUDIO_OPTIONS_MENU:
+                                OptionsAudioMenu.handleInputs(window, key, scancode, action, mods);
                         }
                         
                         break;
@@ -206,24 +209,9 @@ public class Game{
         });
     }
     
-    private void loadOpenAL(){
-        //ready openAL for use
-        context = ALContext.create();
-        device = context.getDevice();
-        context.makeCurrent();
-        ALCCapabilities capabilities = device.getCapabilities();
- 
-        if (!capabilities.OpenALC10){
-            throw new RuntimeException("OpenAL Context Creation failed");
-        }
-        
-        //setup source and buffer ints according to openAL standards
-        Audio.createMusicSource();
-        Audio.createSources(15);
-    }
-    
     public static boolean allFalse(boolean[] array){
         for(boolean b : array) if(b) return false;
             return true;
     }
+    
 }

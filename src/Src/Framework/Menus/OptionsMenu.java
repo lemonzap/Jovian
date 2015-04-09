@@ -549,6 +549,8 @@ public class OptionsMenu{
                                 case 3:
                                     break;
                                 case 4:
+                                    MainMenu.game.setMenuState(Game.MenuState.AUDIO_OPTIONS_MENU);
+                                    OptionsAudioMenu.setSelection(1);
                                     break;
                                 case 5:
                                     MainMenu.game.setMenuState(Game.MenuState.MAIN_MENU);

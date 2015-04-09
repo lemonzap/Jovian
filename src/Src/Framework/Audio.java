@@ -8,6 +8,9 @@ package Src.Framework;
 import java.util.Arrays;
 import org.lwjgl.openal.AL10;
 import static org.lwjgl.openal.AL10.*;
+import org.lwjgl.openal.ALCCapabilities;
+import org.lwjgl.openal.ALContext;
+import org.lwjgl.openal.ALDevice;
 import static org.lwjgl.openal.Util.checkALError;
 import org.newdawn.slick.openal.WaveData;
 
@@ -19,6 +22,9 @@ public class Audio{
     
     static float musicVolume = 1.0f;
     static float effectVolume = 1.0f;
+    
+    static ALContext context;
+    static ALDevice device;
     
     //source used for all music
     private static int musicSource;
@@ -155,6 +161,22 @@ public class Audio{
         musicSource = alGenSources();
     }
     
+    public static void loadOpenAL(){
+        //ready openAL for use
+        context = ALContext.create();
+        device = context.getDevice();
+        context.makeCurrent();
+        ALCCapabilities capabilities = device.getCapabilities();
+ 
+        if (!capabilities.OpenALC10){
+            throw new RuntimeException("OpenAL Context Creation failed");
+        }
+        
+        //setup source and buffer ints according to openAL standards
+        Audio.createMusicSource();
+        Audio.createSources(15);
+    }
+    
     //called every frame to fade sources in need of fading
     public static void fade(){
         if(fading && (!Game.allFalse(fadeIn) || !Game.allFalse(fadeOut))){
@@ -217,4 +239,12 @@ public class Audio{
             alSourcef(source, AL_GAIN, effectVolume);
         }
     }
+    
+    public static float getMusicVolume(){
+        return musicVolume;
+    }
+    public static float getEffectVolume(){
+        return effectVolume;
+    }
+    
 }
