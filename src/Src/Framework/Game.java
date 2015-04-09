@@ -6,6 +6,7 @@
 package Src.Framework;
 
 import Src.Framework.Menus.MainMenu;
+import Src.Framework.Menus.OptionsMenu;
 import java.io.IOException;
 import org.lwjgl.glfw.GLFW;
 import static org.lwjgl.glfw.GLFW.*;
@@ -29,15 +30,15 @@ import org.newdawn.slick.util.ResourceLoader;
  */
 public class Game{
     Window window;
+    private float idealFrameRate = 60.0f;
+    private float realFrameRate;
+    private double lastFrameTime = 0.0;
+    private double timeSinceLastFrame = 0.0;
     
     private Texture logo;
     
     ALContext context;
     ALDevice device;
-
-    Audio menuMusic;
-    Audio menuChangeSelection;
-    Audio menuSelect;
     
     //which option in a menu is currently selected from top to bottom
     int menuSelection = 1;
@@ -45,8 +46,18 @@ public class Game{
     
     //Possible states of the game
     private enum GameState{STARTING, MAIN_MENU, PLAYING}
+    public enum MenuState{MAIN_MENU, SINGLEPLAYER_MENU, MULTIPLAYER_MENU, STAGE_CREATOR_MENU, OPTIONS_MENU}
     
     private GameState gameState;
+    private MenuState menuState;
+
+    public MenuState getMenuState(){
+        return menuState;
+    }
+
+    public void setMenuState(MenuState menuState){
+        this.menuState = menuState;
+    }
     
     Game(Window window){
         this.window = window;
@@ -61,12 +72,21 @@ public class Game{
             //currently unused
             //updateInputs();
             updateGame();
-            render();
+            Audio.fade();
+            
+            //only render at desired fps
+            timeSinceLastFrame = (System.nanoTime()/1000000000.0)- lastFrameTime;
+            if(1.0/timeSinceLastFrame <= idealFrameRate){
+                render();
+                realFrameRate = (float)(1.0/timeSinceLastFrame);
+                lastFrameTime = System.nanoTime()/1000000000.0;
+            }
 
             // Poll for window events(including inputs)
             glfwPollEvents();
         }
-        
+        //close openAL
+        device.destroy();
     }
     
     //per frame game logic
@@ -76,7 +96,7 @@ public class Game{
                 load();
                 initInputPolling();
                 gameState = GameState.MAIN_MENU;
-                menuMusic.play(true);
+                MainMenu.init(this);
                 break;
             case MAIN_MENU:
                 break;
@@ -84,11 +104,6 @@ public class Game{
                 
                 break;
         }
-    }
-    
-    //per frame what inputs have changed
-    private void updateInputs(){
-        
     }
     
     //render per frame
@@ -101,7 +116,20 @@ public class Game{
                 break;
             case MAIN_MENU:
                 
-                MainMenu.render();
+                switch(menuState){
+                            case MAIN_MENU:
+                                MainMenu.render();
+                                break;
+                            case SINGLEPLAYER_MENU:
+                                break;
+                            case MULTIPLAYER_MENU:
+                                break;
+                            case STAGE_CREATOR_MENU:
+                                break;
+                            case OPTIONS_MENU:
+                                OptionsMenu.render();
+                                break;
+                        }
                 
                 break;
             case PLAYING:
@@ -141,65 +169,35 @@ public class Game{
         
         //loading resources for main menu
         loadOpenAL();
-        MainMenu.load();  
-        //placeholder sounds
-        menuMusic = new Audio("Src/Resources/Sounds/MMXTitleTheme.wav", true);
-        menuChangeSelection = new Audio("Src/Resources/Sounds/Blip_Select.wav", false);
-        menuSelect = new Audio("Src/Resources/Sounds/blipChoose.wav", false);
+        MainMenu.load();
+        OptionsMenu.load();
         
     }
     
     private void initInputPolling(){
         //set up input polling
         glfwSetKeyCallback(window.getWindowHandle(), keyCallBack = new GLFWKeyCallback(){
+            //called whenever input has changed
             @Override
             public void invoke(long window, int key, int scancode, int action, int mods) {
                 switch(gameState){
                     case MAIN_MENU:
-                        if ( key == GLFW_KEY_W && (action == GLFW_PRESS || action == GLFW_REPEAT)){
-                            menuSelection-=1;
-                            //if selection would increment past limit then undo
-                            if(menuSelection == 0){
-                                menuSelection+=1;
-                            }else{
-                                MainMenu.setSelection(menuSelection);
-                                menuChangeSelection.play(false);
-                            }
+                        
+                        switch(menuState){
+                            case MAIN_MENU:
+                                MainMenu.handleInputs(window, key, scancode, action, mods);
+                                break;
+                            case SINGLEPLAYER_MENU:
+                                break;
+                            case MULTIPLAYER_MENU:
+                                break;
+                            case STAGE_CREATOR_MENU:
+                                break;
+                            case OPTIONS_MENU:
+                                OptionsMenu.handleInputs(window, key, scancode, action, mods);
+                                break;
                         }
-                        if ( key == GLFW_KEY_S && (action == GLFW_PRESS || action == GLFW_REPEAT)){
-                            menuSelection+=1;
-                            //if selection would increment past limit then undo
-                            if(menuSelection == 6){
-                                menuSelection-=1;
-                            }else{
-                                MainMenu.setSelection(menuSelection);
-                                menuChangeSelection.play(false);
-                            }
-                        }
-                        if ( key == GLFW_KEY_ENTER && (action == GLFW_RELEASE)){
-                            menuSelect.play(false);
-                            switch(menuSelection){
-                                case 1:
-                                    break;
-                                case 2:
-                                    break;
-                                case 3:
-                                    break;
-                                case 4:
-                                    break;
-                                case 5:
-                                    //wait for select sound to stop playing before closing
-                                    while(menuSelect.isPlaying()){
-                                        
-                                    }
-                                    //tell main loop to exit
-                                    glfwSetWindowShouldClose(window, GL_TRUE);
-                                    //close openAL
-                                    device.destroy();
-                                    break;
-                                    
-                            }
-                        }
+                        
                         break;
                     case PLAYING:
                         break;
@@ -224,4 +222,8 @@ public class Game{
         Audio.createSources(15);
     }
     
+    public static boolean allFalse(boolean[] array){
+        for(boolean b : array) if(b) return false;
+            return true;
+    }
 }

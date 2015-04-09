@@ -5,6 +5,7 @@
  */
 package Src.Framework;
 
+import java.util.Arrays;
 import org.lwjgl.openal.AL10;
 import static org.lwjgl.openal.AL10.*;
 import static org.lwjgl.openal.Util.checkALError;
@@ -16,9 +17,19 @@ import org.newdawn.slick.openal.WaveData;
  */
 public class Audio{
     
+    static float musicVolume = 1.0f;
+    static float effectVolume = 1.0f;
+    
     //source used for all music
     private static int musicSource;
     private static int sources[];
+    //which sources should be fading in and out currently. 15 is music source
+    private static boolean fadeIn[];
+    private static boolean fadeOut[];
+    private static float fadeTime[];
+    private static float lastFadeTime = 0.0f;
+    private static float timeSinceLastFade;
+    private static boolean fading = false;
     //any audio not designated "music" gets its own source
     private int source;
     //the buffer stores the audio for use
@@ -26,7 +37,7 @@ public class Audio{
     private String loc;
     private boolean isMusic = false;
     
-    Audio(String loc, boolean isMusic){
+    public Audio(String loc, boolean isMusic){
         this.loc = loc;
         this.isMusic = isMusic;
         this.load();
@@ -43,7 +54,7 @@ public class Audio{
         checkALError();
     }
     
-    public void play(boolean loop){
+    public void play(boolean loop, boolean fade, float fadeDuration){
         //if music then use music source
         if(isMusic){
             alSourceUnqueueBuffers(musicSource);
@@ -52,6 +63,13 @@ public class Audio{
                 alSourcei(musicSource, AL_LOOPING, AL_TRUE);
             }
             alSourcePlay(musicSource);
+            fadeIn[15] = fade;
+            fadeTime[15] = fadeDuration;
+                if(!fading && fade){
+                    fading = true;
+                    lastFadeTime = (float)(System.nanoTime()/1000000000.0);
+                    alSourcef(musicSource, AL_GAIN, 0);
+                }
         }else{
             //searches for first available source to play from
             for(int i = 0; i < sources.length; i++){
@@ -59,6 +77,14 @@ public class Audio{
                     source = i;
                     alSourceUnqueueBuffers(sources[i]);
                     alSourceQueueBuffers(sources[i], buffer);
+                    
+                    fadeIn[i] = fade;
+                    fadeTime[i] = fadeDuration;
+                    if(!fading && fade){
+                        fading = true;
+                        lastFadeTime = (float)(System.nanoTime()/1000000000.0);
+                        alSourcef(sources[i], AL_GAIN, 0);
+                    }
                     if(loop){
                         alSourcei(sources[i], AL_LOOPING, AL_TRUE);
                     }
@@ -72,12 +98,28 @@ public class Audio{
         
     }
     
-    public void stop(){
+    public void stop(boolean fade, float fadeDuration){
         if(isMusic){
-            alSourceStop(musicSource);
+            if(!fade){
+                alSourceStop(musicSource);
+            }
+            fadeOut[15] = fade;
+            fadeTime[15] = fadeDuration;
+            if(!fading && fade){
+                fading = true;
+                lastFadeTime = (float)(System.nanoTime()/1000000000.0);
+            }
         }else{
             if(this.isPlaying()){
-                alSourceStop(sources[source]);
+                if(!fade){
+                    alSourceStop(sources[source]);
+                }
+                fadeIn[source] = fade;
+                fadeTime[source] = fadeDuration;
+                if(!fading && fade){
+                    fading = true;
+                    lastFadeTime = (float)(System.nanoTime()/1000000000.0);
+                }
             }
         }
     }
@@ -101,6 +143,9 @@ public class Audio{
     //create as many sources as designated
     public static void createSources(int num){
         sources = new int[num];
+        fadeIn = new boolean[num+1];
+        fadeOut = new boolean[num+1];
+        fadeTime = new float[num+1];
         for(int i = 0;i < num;i++){
             sources[i] = alGenSources();
         }
@@ -110,4 +155,66 @@ public class Audio{
         musicSource = alGenSources();
     }
     
+    //called every frame to fade sources in need of fading
+    public static void fade(){
+        if(fading && (!Game.allFalse(fadeIn) || !Game.allFalse(fadeOut))){
+            timeSinceLastFade = (float)(System.nanoTime()/1000000000.0) - lastFadeTime;
+            lastFadeTime = (float)(System.nanoTime()/1000000000.0);
+            if(fadeIn[15]){
+                //increment volume based on elapsed time
+                alSourcef(musicSource, AL_GAIN, alGetSourcef(musicSource, AL_GAIN) + musicVolume*(timeSinceLastFade/fadeTime[15]));
+                //once volume exceeds or equals desired volume set it to desired volume and set fade to false
+                if(alGetSourcef(musicSource, AL_GAIN) >= musicVolume){
+                    alSourcef(musicSource, AL_GAIN, musicVolume);
+                    fadeIn[15] = false;
+                }
+            }
+            if(fadeOut[15]){
+                //increment volume based on elapsed time
+                alSourcef(musicSource, AL_GAIN, alGetSourcef(musicSource, AL_GAIN) - musicVolume*(timeSinceLastFade/fadeTime[15]));
+                //once volume exceeds or equals desired volume set it to desired volume and set fade to false
+                if(alGetSourcef(musicSource, AL_GAIN) <= 0.01){
+                    alSourceStop(musicSource);
+                    alSourcef(musicSource, AL_GAIN, musicVolume);
+                    fadeOut[15] = false;
+                }
+            }
+            for(int i = 0; i < fadeIn.length-1; i++){
+                if(fadeIn[i]){
+                    //increment volume based on elapsed time
+                    alSourcef(sources[i], AL_GAIN, alGetSourcef(sources[i], AL_GAIN) + effectVolume*(timeSinceLastFade/fadeTime[i]));
+                    //once volume exceeds or equals desired volume set it to desired volume and set fade to false
+                    if(alGetSourcef(sources[i], AL_GAIN) >= effectVolume){
+                        alSourcef(sources[i], AL_GAIN, effectVolume);
+                        fadeIn[i] = false;
+                    }
+                }
+                if(fadeOut[i]){
+                    //increment volume based on elapsed time
+                    alSourcef(sources[i], AL_GAIN, alGetSourcef(sources[i], AL_GAIN) - effectVolume*(timeSinceLastFade/fadeTime[i]));
+                    //once volume exceeds or equals desired volume set it to desired volume and set fade to false
+                    if(alGetSourcef(sources[i], AL_GAIN) <= 0){
+                        alSourceStop(sources[i]);
+                        alSourcef(sources[i], AL_GAIN, effectVolume);
+                        fadeOut[i] = false;
+                    }
+                }
+            }
+        }else{
+            //if all fade booleans are false then turn off fading
+            fading = false;
+        }
+        
+    }
+    
+    public static void setMusicVolume(float volume){
+        musicVolume = volume;
+        alSourcef(musicSource, AL_GAIN, musicVolume);
+    }
+    public static void setEffectVolume(float volume){
+        effectVolume = volume;
+        for(int source : sources){
+            alSourcef(source, AL_GAIN, effectVolume);
+        }
+    }
 }

@@ -5,8 +5,19 @@
  */
 package Src.Framework.Menus;
 
+import Src.Framework.Audio;
+import Src.Framework.Game;
 import java.io.IOException;
+import static org.lwjgl.glfw.GLFW.GLFW_KEY_ENTER;
+import static org.lwjgl.glfw.GLFW.GLFW_KEY_M;
+import static org.lwjgl.glfw.GLFW.GLFW_KEY_S;
+import static org.lwjgl.glfw.GLFW.GLFW_KEY_W;
+import static org.lwjgl.glfw.GLFW.GLFW_PRESS;
+import static org.lwjgl.glfw.GLFW.GLFW_RELEASE;
+import static org.lwjgl.glfw.GLFW.GLFW_REPEAT;
+import static org.lwjgl.glfw.GLFW.glfwSetWindowShouldClose;
 import org.lwjgl.opengl.GL11;
+import static org.lwjgl.opengl.GL11.GL_TRUE;
 import org.newdawn.slick.Color;
 import org.newdawn.slick.opengl.Texture;
 import org.newdawn.slick.opengl.TextureLoader;
@@ -17,9 +28,12 @@ import org.newdawn.slick.util.ResourceLoader;
  * @author Lemonzap
  */
 public class MainMenu{
+    
+    static Game game;
+    
     static int selection = 1;
-    static private Texture menuBackground;
-    static private Texture title;
+    static Texture menuBackground;
+    static Texture title;
     static private Texture singleplayer;
     static private Texture singleplayerSelected;
     static private Texture multiplayer;
@@ -28,8 +42,12 @@ public class MainMenu{
     static private Texture stageCreatorSelected;
     static private Texture options;
     static private Texture optionsSelected;
-    static private Texture exit;
-    static private Texture exitSelected;
+    static Texture exit;
+    static Texture exitSelected;
+    
+    static Audio menuMusic;
+    static Audio menuChangeSelection;
+    static Audio menuSelect;
     
     public static void render(){
         //bind white before binding any textures
@@ -506,10 +524,65 @@ public class MainMenu{
         } catch (IOException e){
             e.printStackTrace();
         }
+        
+        //placeholder sounds
+        menuMusic = new Audio("Src/Resources/Sounds/MMXTitleTheme.wav", true);
+        menuChangeSelection = new Audio("Src/Resources/Sounds/Blip_Select.wav", false);
+        menuSelect = new Audio("Src/Resources/Sounds/blipChoose.wav", false);
     }
     
     public static void setSelection(int aSelection){
         selection = aSelection;
     }
     
+    public static void handleInputs(long window, int key, int scancode, int action, int mods){
+        if ( key == GLFW_KEY_W && (action == GLFW_PRESS || action == GLFW_REPEAT)){
+            selection-=1;
+            //if selection would increment past limit then undo
+            if(selection == 0){
+                selection+=1;
+            }else{
+                menuChangeSelection.play(false, false, 0);
+            }
+        }
+        if ( key == GLFW_KEY_S && (action == GLFW_PRESS || action == GLFW_REPEAT)){
+            selection+=1;
+            //if selection would increment past limit then undo
+            if(selection == 6){
+                selection-=1;
+            }else{
+                menuChangeSelection.play(false, false, 0);
+            }
+        }
+        if ( key == GLFW_KEY_ENTER && (action == GLFW_RELEASE)){
+            menuSelect.play(false, false, 0);
+            switch(selection){
+                case 1:
+                    break;
+                case 2:
+                    break;
+                case 3:
+                    break;
+                case 4:
+                    game.setMenuState(Game.MenuState.OPTIONS_MENU);
+                    OptionsMenu.setSelection(1);
+                    break;
+                case 5:
+                    //wait for select sound to stop playing before closing
+                    while(menuSelect.isPlaying()){
+
+                    }
+                    //tell main loop to exit
+                    glfwSetWindowShouldClose(window, GL_TRUE);
+                    break;
+
+            }
+        }
+    }
+    
+    public static void init(Game aGame){
+        menuMusic.play(true, true, 2.5f);
+        game = aGame;
+        game.setMenuState(Game.MenuState.MAIN_MENU);
+    }
 }
