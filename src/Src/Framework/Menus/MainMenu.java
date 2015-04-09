@@ -526,9 +526,9 @@ public class MainMenu{
         }
         
         //placeholder sounds
-        menuMusic = new Audio("Src/Resources/Sounds/MMXTitleTheme.wav", true);
-        menuChangeSelection = new Audio("Src/Resources/Sounds/Blip_Select.wav", false);
-        menuSelect = new Audio("Src/Resources/Sounds/blipChoose.wav", false);
+        menuMusic = new Audio("Src/Resources/Audio/Music/MMXTitleTheme.wav", true);
+        menuChangeSelection = new Audio("Src/Resources/Audio/Sounds/Blip_Select.wav", false);
+        menuSelect = new Audio("Src/Resources/Audio/Sounds/blipChoose.wav", false);
     }
     
     public static void setSelection(int aSelection){
